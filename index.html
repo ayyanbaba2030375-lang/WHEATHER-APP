@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Weather App Pro</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+
+body{
+    background: linear-gradient(135deg,#0f172a,#1e293b,#334155);
+    min-height:100vh;
+}
+
+header h1{
+    transition:0.4s;
+}
+
+header h1:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 25px white;
+}
+
+.weather-card{
+    backdrop-filter: blur(15px);
+    animation: fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@media(max-width:640px){
+
+    form{
+        flex-direction:column;
+    }
+
+    input,button{
+        width:90% !important;
+    }
+
+    header h1{
+        font-size:2rem;
+    }
+}
+
+</style>
+
+</head>
+<body>
+
+<header class="flex justify-center items-center h-[25vh]">
+
+<h1 class="text-5xl bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-10 py-5 rounded-3xl font-bold">
+Weather App
+</h1>
+
+</header>
+
+<div class="flex justify-center">
+
+<form onsubmit="FindWeather(event)" class="flex gap-4 items-center">
+
+<input
+id="cityInput"
+type="text"
+placeholder="Enter City Name..."
+required
+class="w-[400px] h-[60px] rounded-full px-6 text-lg font-semibold outline-none border-4 border-cyan-400"
+/>
+
+<button
+type="submit"
+class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition"
+>
+Search
+</button>
+
+</form>
+
+</div>
+
+<div class="text-center mt-5">
+
+<p id="loading" class="text-white text-lg hidden">
+Loading...
+</p>
+
+<p id="error" class="text-red-400 font-bold"></p>
+
+</div>
+
+<div class="flex justify-center mt-8">
+
+<div class="weather-card bg-white/90 w-[90%] max-w-lg rounded-3xl shadow-2xl p-6 text-center">
+
+<img id="weatherIcon" src="" class="mx-auto mb-4" width="120">
+
+<h2 id="cityName" class="text-3xl font-bold text-slate-800"></h2>
+
+<p id="condition" class="text-lg text-slate-600 mb-4"></p>
+
+<div class="grid grid-cols-2 gap-3">
+
+<div class="bg-cyan-100 p-3 rounded-xl">
+<h3 class="font-bold">Temperature</h3>
+<p id="temp"></p>
+</div>
+
+<div class="bg-blue-100 p-3 rounded-xl">
+<h3 class="font-bold">Fahrenheit</h3>
+<p id="fahrenheit"></p>
+</div>
+
+<div class="bg-cyan-100 p-3 rounded-xl">
+<h3 class="font-bold">Humidity</h3>
+<p id="humidity"></p>
+</div>
+
+<div class="bg-blue-100 p-3 rounded-xl">
+<h3 class="font-bold">Feels Like</h3>
+<p id="feels"></p>
+</div>
+
+<div class="bg-cyan-100 p-3 rounded-xl">
+<h3 class="font-bold">Wind</h3>
+<p id="wind"></p>
+</div>
+
+<div class="bg-blue-100 p-3 rounded-xl">
+<h3 class="font-bold">Region</h3>
+<p id="region"></p>
+</div>
+
+<div class="bg-cyan-100 p-3 rounded-xl">
+<h3 class="font-bold">Latitude</h3>
+<p id="lat"></p>
+</div>
+
+<div class="bg-blue-100 p-3 rounded-xl">
+<h3 class="font-bold">Longitude</h3>
+<p id="lon"></p>
+</div>
+
+</div>
+
+<div class="mt-4">
+
+<p id="country" class="font-semibold"></p>
+
+<p id="time" class="font-semibold"></p>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+async function FindWeather(event){
+
+event.preventDefault();
+
+const city = document.querySelector("#cityInput").value;
+
+const loading = document.querySelector("#loading");
+const error = document.querySelector("#error");
+
+loading.classList.remove("hidden");
+error.innerHTML = "";
+
+try{
+
+const result = await axios(
+`https://api.weatherapi.com/v1/current.json?key=25175e31b7074cfc895204529222906&q=${city}`
+);
+
+const data = result.data;
+
+document.querySelector("#cityName").innerHTML =
+`${data.location.name}`;
+
+document.querySelector("#condition").innerHTML =
+data.current.condition.text;
+
+document.querySelector("#temp").innerHTML =
+`${data.current.temp_c} °C`;
+
+document.querySelector("#fahrenheit").innerHTML =
+`${data.current.temp_f} °F`;
+
+document.querySelector("#humidity").innerHTML =
+`${data.current.humidity}%`;
+
+document.querySelector("#feels").innerHTML =
+`${data.current.feelslike_c} °C`;
+
+document.querySelector("#wind").innerHTML =
+`${data.current.wind_kph} km/h`;
+
+document.querySelector("#region").innerHTML =
+data.location.region;
+
+document.querySelector("#lat").innerHTML =
+data.location.lat;
+
+document.querySelector("#lon").innerHTML =
+data.location.lon;
+
+document.querySelector("#country").innerHTML =
+`Country: ${data.location.country}`;
+
+document.querySelector("#time").innerHTML =
+`Local Time: ${data.location.localtime}`;
+
+let condition =
+data.current.condition.text.toLowerCase();
+
+let icon =
+document.querySelector("#weatherIcon");
+
+if(condition.includes("sunny")){
+icon.src =
+"https://cdn-icons-png.flaticon.com/512/869/869869.png";
+}
+else if(condition.includes("cloud")){
+icon.src =
+"https://cdn-icons-png.flaticon.com/512/414/414825.png";
+}
+else if(condition.includes("rain")){
+icon.src =
+"https://cdn-icons-png.flaticon.com/512/3351/3351979.png";
+}
+else if(condition.includes("snow")){
+icon.src =
+"https://cdn-icons-png.flaticon.com/512/642/642102.png";
+}
+else{
+icon.src =
+"https://cdn-icons-png.flaticon.com/512/4005/4005901.png";
+}
+
+}
+catch(err){
+
+error.innerHTML =
+"City not found. Please enter a valid city name.";
+
+}
+finally{
+
+loading.classList.add("hidden");
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
